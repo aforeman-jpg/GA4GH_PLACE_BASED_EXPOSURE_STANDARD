@@ -29,7 +29,7 @@ python tools/validate.py my_cohort_metadata.yaml
 YAML pitfall: quote country codes in data files (`["NO"]`, not `[NO]`). Unquoted `NO`
 (Norway) is read as boolean `false` by YAML 1.1 parsers. Submitting JSON avoids this.
 
-## What changed from the spreadsheet
+## Place-based exposure schema 
 
 | CSV field | Machine-readable form | Why |
 |---|---|---|

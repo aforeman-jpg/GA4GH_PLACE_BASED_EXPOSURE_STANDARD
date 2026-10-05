@@ -15,8 +15,6 @@ Documentation laying out how to implement the place-based exposure standard belo
 We are creating a machine-readable *Place-Based Exposures Metadata Schema*. Each
 **record** describes one exposure variable linked to one cohort. Find out more about the work in 
 
-```
-
 ## Place-based Exposures MetaData Schema (draft 0.1.0)
 This is the first version of the standard. The schema contains both Core and Optional Elements. When appropriate, the schema advises on what existing ontologies are required. 
 

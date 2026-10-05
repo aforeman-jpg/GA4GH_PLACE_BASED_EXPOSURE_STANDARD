@@ -15,16 +15,6 @@ Documentation laying out how to implement the place-based exposure standard belo
 We are creating a machine-readable *Place-Based Exposures Metadata Schema*. Each
 **record** describes one exposure variable linked to one cohort. Find out more about the work in 
 
-## Repository layout
-
-```
-schema/exposure_linkage_schema.yaml   # LinkML source - edit this file only
-schema/exposure_linkage.schema.json   # generated JSON Schema 2020-12 - do not hand-edit
-tools/linkml_to_jsonschema.py         # generator (stand-in for LinkML's gen-json-schema)
-tools/validate.py                     # validate metadata files; exit 1 on any error
-examples/valid/*.yaml                 # must pass CI
-examples/invalid/*.yaml               # must fail CI (regression tests for the rules)
-.github/workflows/validate.yml
 ```
 
 ## Place-based Exposures MetaData Schema (draft 0.1.0)

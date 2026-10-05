@@ -19,16 +19,6 @@ examples/invalid/*.yaml               # must fail CI (regression tests for the r
 .github/workflows/validate.yml
 ```
 
-## Validating a submission
-
-```bash
-pip install jsonschema pyyaml
-python tools/validate.py my_cohort_metadata.yaml
-```
-
-YAML pitfall: quote country codes in data files (`["NO"]`, not `[NO]`). Unquoted `NO`
-(Norway) is read as boolean `false` by YAML 1.1 parsers. Submitting JSON avoids this.
-
 ## Place-based exposure schema 
 
 | CSV field | Machine-readable form | Why |
@@ -60,6 +50,7 @@ YAML pitfall: quote country codes in data files (`["NO"]`, not `[NO]`). Unquoted
 | Geocoding Database Version | `geocoder` + `relinkages[]` `{date, reason}` | |
 | Creator(s) | `creators[]`: `{name, email, orcid, role}` | ORCID gives a persistent identity |
 
+
 **Tiers.** CORE fields are `required: true`. Recommended fields carry LinkML's
 `recommended: true`; LinkML tooling reports them as warnings, and JSON Schema ignores them.
 
@@ -81,6 +72,16 @@ YAML pitfall: quote country codes in data files (`["NO"]`, not `[NO]`). Unquoted
 | `temporal_resolution = PERIODIC_UPDATE` | `update_frequency` |
 | `ongoing = true` | `last_updated` |
 | any citation | at least one of `doi`, `url`, `text` |
+
+## Validating a submission
+
+```bash
+pip install jsonschema pyyaml
+python tools/validate.py my_cohort_metadata.yaml
+```
+
+YAML pitfall: quote country codes in data files (`["NO"]`, not `[NO]`). Unquoted `NO`
+(Norway) is read as boolean `false` by YAML 1.1 parsers. Submitting JSON avoids this.
 
 ## Open items for the Work Stream
 

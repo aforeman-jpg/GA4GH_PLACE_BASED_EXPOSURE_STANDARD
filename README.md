@@ -1,7 +1,11 @@
 # GA4GH Environmental Exposure Linkage Metadata (draft 0.1.0)
 
-A machine-readable version of *Implementation 1 – GA4GH Metadata Schema*. Each
-**record** describes one exposure variable linked to one cohort.
+Environmental exposures such as air pollution, diet, physical activity, and social stress can influence the onset of disease. These effects often accumulate slowly over time and can depend on multiple factors such as lifestyle, occupation, and living conditions. Currently, environmental data is captured in different ways by research groups internationally, making it hard to compare or combine this information. We have set up the Human Exposome.
+
+The Human Exposome Data Standards Study Group is working to solve a big problem in global health research: there are not yet consistent, shared ways to describe how the environment affects human health — especially over long periods of time and across different populations. Find out more here: https://doi.org/10.5281/zenodo.21877291
+
+We are creating a machine-readable *Place-Based Exposures Metadata Schema*. Each
+**record** describes one exposure variable linked to one cohort. Find out more about the work in 
 
 ## Repository layout
 

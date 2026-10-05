@@ -1,0 +1,968 @@
+id: https://w3id.org/ga4gh/exposure-linkage   # placeholder - register a w3id before release
+name: exposure_linkage
+title: GA4GH Environmental Exposure Linkage Metadata
+description: >-
+  Describes how an environmental exposure dataset was linked to cohort
+  participants. One ExposureLinkageRecord = one exposure variable linked
+  in one cohort. Converted from "Implementation 1 - GA4GH Metadata Schema".
+version: 0.1.0
+license: Apache-2.0
+prefixes:
+  linkml: https://w3id.org/linkml/
+  expo: https://w3id.org/ga4gh/exposure-linkage/
+  ENVO: http://purl.obolibrary.org/obo/ENVO_
+  ExO: http://purl.obolibrary.org/obo/ExO_
+  MESH: http://id.nlm.nih.gov/mesh/
+  PUBCHEM: http://rdf.ncbi.nlm.nih.gov/pubchem/compound/CID
+  INCHIKEY: "https://identifiers.org/inchikey:"
+  CAS: "https://identifiers.org/cas:"
+  DTXSID: https://comptox.epa.gov/dashboard/chemical/details/
+  ORCID: https://orcid.org/
+default_prefix: expo
+default_range: string
+imports:
+  - linkml:types
+
+# ---------------------------------------------------------------- types
+types:
+  RegionCode:
+    typeof: string
+    description: ISO 3166-1 alpha-2 or ISO 3166-2 subdivision (e.g. US-NC).
+    pattern: "^(AD|AE|AF|AG|AI|AL|AM|AO|AQ|AR|AS|AT|AU|AW|AX|AZ|BA|BB|BD|BE|BF|BG|BH|BI|BJ|BL|BM|BN|BO|BQ|BR|BS|BT|BV|BW|BY|BZ|CA|CC|CD|CF|CG|CH|CI|CK|CL|CM|CN|CO|CR|CU|CV|CW|CX|CY|CZ|DE|DJ|DK|DM|DO|DZ|EC|EE|EG|EH|ER|ES|ET|FI|FJ|FK|FM|FO|FR|GA|GB|GD|GE|GF|GG|GH|GI|GL|GM|GN|GP|GQ|GR|GS|GT|GU|GW|GY|HK|HM|HN|HR|HT|HU|ID|IE|IL|IM|IN|IO|IQ|IR|IS|IT|JE|JM|JO|JP|KE|KG|KH|KI|KM|KN|KP|KR|KW|KY|KZ|LA|LB|LC|LI|LK|LR|LS|LT|LU|LV|LY|MA|MC|MD|ME|MF|MG|MH|MK|ML|MM|MN|MO|MP|MQ|MR|MS|MT|MU|MV|MW|MX|MY|MZ|NA|NC|NE|NF|NG|NI|NL|NO|NP|NR|NU|NZ|OM|PA|PE|PF|PG|PH|PK|PL|PM|PN|PR|PS|PT|PW|PY|QA|RE|RO|RS|RU|RW|SA|SB|SC|SD|SE|SG|SH|SI|SJ|SK|SL|SM|SN|SO|SR|SS|ST|SV|SX|SY|SZ|TC|TD|TF|TG|TH|TJ|TK|TL|TM|TN|TO|TR|TT|TV|TW|TZ|UA|UG|UM|US|UY|UZ|VA|VC|VE|VG|VI|VN|VU|WF|WS|YE|YT|ZA|ZM|ZW)(-[A-Z0-9]{1,3})?$"
+  PartialDate:
+    typeof: string
+    description: ISO 8601 YYYY, YYYY-MM or YYYY-MM-DD.
+    pattern: "^\\d{4}(-(0[1-9]|1[0-2])(-(0[1-9]|[12]\\d|3[01]))?)?$"
+  CURIE:
+    typeof: uriorcurie
+    description: Compact identifier, e.g. INCHIKEY:..., ENVO:..., MESH:...
+  UcumCode:
+    typeof: string
+    description: >-
+      UCUM case-sensitive code, e.g. ug/m3, ng/m3, [ppb], [ppm], Cel, mm,
+      m/s, W/m2, /km2, %, 1 (dimensionless index). dB(A) has no UCUM code -
+      use "dB" with weighting recorded in exposure_variable.
+
+# ---------------------------------------------------------------- classes
+classes:
+  ExposureLinkageCollection:
+    tree_root: true
+    description: Container so one file can hold many records.
+    attributes:
+      records:
+        range: ExposureLinkageRecord
+        multivalued: true
+        inlined_as_list: true
+        required: true
+
+  ExposureLinkageRecord:
+    description: One exposure variable linked to one cohort.
+    attributes:
+      id:
+        identifier: true
+        description: Stable record identifier, e.g. UKB-NO2-ELAPSE-2010.
+      cohort:
+        range: Cohort
+        required: true
+        inlined: true
+      exposure:
+        range: ExposureVariable
+        required: true
+        inlined: true
+      source_data:
+        range: SourceDataset
+        required: true
+        inlined: true
+      linkage:
+        range: Linkage
+        required: true
+        inlined: true
+      creators:
+        range: Person
+        multivalued: true
+        inlined_as_list: true
+        recommended: true
+
+  Cohort:
+    description: "CSV: Cohort / Study Name; Country of Participant Data Collection"
+    attributes:
+      name:
+        required: true
+        description: Full name, e.g. UK Biobank.
+      acronym:
+        required: true
+        description: e.g. UKB. Split out of the old "Name (ACRONYM)" string.
+      collection_countries:
+        range: CountryCodeEnum
+        multivalued: true
+        required: true
+
+  ExposureVariable:
+    description: "CSV: Exposure Domain; Exposure Variable Name; Ontology Term ID; Unit"
+    attributes:
+      domain:
+        range: ExposureDomainEnum
+        required: true
+      domain_other:
+        description: Required when domain = OTHER.
+      name:
+        required: true
+        description: Descriptive term, e.g. NO2, PM2.5, Lden, NDVI.
+      ontology_terms:
+        range: CURIE
+        multivalued: true
+        recommended: true
+        description: >-
+          Chemicals: INCHIKEY (preferred), PUBCHEM, DTXSID, CAS.
+          Physical/environmental: ExO, ENVO, MESH. Leave empty if none exists.
+      unit:
+        range: UcumCode
+        description: Omit for categorical variables.
+      is_categorical:
+        range: boolean
+    rules:
+      - description: OTHER domain must be specified.
+        preconditions:
+          slot_conditions:
+            domain:
+              equals_string: OTHER
+        postconditions:
+          slot_conditions:
+            domain_other:
+              required: true
+
+  SourceDataset:
+    description: The upstream exposure product (model, satellite, monitors...).
+    attributes:
+      origin:
+        range: DataOriginEnum
+        required: true
+      dataset_name:
+        required: true
+        description: e.g. ELAPSE LUR, ERA5, MODIS MOD13A3.
+      dataset_version:
+        required: true
+        description: Version number or release year, e.g. 2.0, 006, 2023.
+      citations:
+        range: Citation
+        multivalued: true
+        required: true
+        inlined_as_list: true
+      geographic_coverage:
+        range: GeographicCoverage
+        required: true
+        inlined: true
+      spatial_resolution:
+        range: SpatialResolution
+        required: true
+        inlined: true
+      temporal_coverage:
+        range: TemporalCoverage
+        required: true
+        inlined: true
+      temporal_resolution:
+        range: TemporalResolutionEnum
+        required: true
+      update_frequency:
+        description: For PERIODIC_UPDATE, e.g. P5Y (ISO 8601 duration).
+        pattern: "^P(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?$"
+      validation_metrics:
+        range: ValidationMetric
+        multivalued: true
+        inlined_as_list: true
+        recommended: true
+        description: Empty list + validation_reported=false means not validated.
+      validation_reported:
+        range: boolean
+      uncertainty:
+        range: Uncertainty
+        inlined: true
+        recommended: true
+    rules:
+      - description: Periodic update needs a frequency.
+        preconditions:
+          slot_conditions:
+            temporal_resolution:
+              equals_string: PERIODIC_UPDATE
+        postconditions:
+          slot_conditions:
+            update_frequency:
+              required: true
+
+  Citation:
+    attributes:
+      doi:
+        pattern: "^10\\.\\d{4,9}/\\S+$"
+        description: "Bare DOI, without the doi: prefix."
+      url:
+        range: uri
+      accessed:
+        range: date
+        description: Required when url is given without a DOI.
+      text:
+        description: Free-text citation if no DOI/URL.
+      used_for_linkage:
+        range: boolean
+        description: Replaces the old "*" marker.
+    any_of:
+      - slot_conditions:
+          doi:
+            required: true
+      - slot_conditions:
+          url:
+            required: true
+      - slot_conditions:
+          text:
+            required: true
+
+  GeographicCoverage:
+    attributes:
+      scope:
+        range: GeographicScopeEnum
+        required: true
+      regions:
+        range: RegionCode
+        multivalued: true
+        description: Required when scope = COUNTRIES_OR_REGIONS.
+      description:
+        description: Optional note, e.g. "UK-wide", "multiple provinces".
+    rules:
+      - description: Country/region scope needs region codes.
+        preconditions:
+          slot_conditions:
+            scope:
+              equals_string: COUNTRIES_OR_REGIONS
+        postconditions:
+          slot_conditions:
+            regions:
+              required: true
+
+  SpatialResolution:
+    attributes:
+      type:
+        range: SpatialResolutionTypeEnum
+        required: true
+      cell_width:
+        range: float
+        description: For GRID_METRIC (metres) or GRID_DEGREE (degrees).
+      cell_height:
+        range: float
+      admin_unit_name:
+        description: For ADMINISTRATIVE_UNIT, e.g. LSOA, census tract.
+      admin_unit_approx_population:
+        range: integer
+    rules:
+      - description: Metric grid needs cell size.
+        preconditions:
+          slot_conditions:
+            type:
+              equals_string: GRID_METRIC
+        postconditions:
+          slot_conditions:
+            cell_width:
+              required: true
+            cell_height:
+              required: true
+      - description: Degree grid needs cell size.
+        preconditions:
+          slot_conditions:
+            type:
+              equals_string: GRID_DEGREE
+        postconditions:
+          slot_conditions:
+            cell_width:
+              required: true
+            cell_height:
+              required: true
+      - description: Admin unit needs a unit name.
+        preconditions:
+          slot_conditions:
+            type:
+              equals_string: ADMINISTRATIVE_UNIT
+        postconditions:
+          slot_conditions:
+            admin_unit_name:
+              required: true
+
+  TemporalCoverage:
+    attributes:
+      start:
+        range: PartialDate
+        required: true
+      end:
+        range: PartialDate
+        description: Omit when ongoing = true.
+      ongoing:
+        range: boolean
+      last_updated:
+        range: PartialDate
+        description: Required when ongoing = true.
+    rules:
+      - description: Ongoing datasets need a last-updated date.
+        preconditions:
+          slot_conditions:
+            ongoing:
+              equals_string: "true"
+        postconditions:
+          slot_conditions:
+            last_updated:
+              required: true
+
+  ValidationMetric:
+    attributes:
+      metric:
+        range: ValidationMetricEnum
+        required: true
+      validation_design:
+        range: ValidationDesignEnum
+      value:
+        range: float
+        required: true
+      unit:
+        range: UcumCode
+        description: For RMSE / mean bias; omit for R2, r, %.
+
+  Uncertainty:
+    attributes:
+      type:
+        range: UncertaintyTypeEnum
+        required: true
+      value:
+        range: float
+      lower:
+        range: float
+      upper:
+        range: float
+      unit:
+        range: UcumCode
+      carried_to_participant_level:
+        range: boolean
+
+  Linkage:
+    description: How exposure values were assigned to participants.
+    attributes:
+      spatial_linkage_unit:
+        range: SpatialLinkageUnitEnum
+        required: true
+      centroid_weighting:
+        range: CentroidWeightingEnum
+        description: Required for any *_CENTROID unit.
+      centroid_areal_unit:
+      population_dataset:
+        description: For population-weighted centroids.
+      operation:
+        range: LinkageOperationEnum
+        required: true
+      buffer_radii_m:
+        range: float
+        multivalued: true
+        minimum_value: 0
+        description: Required for CIRCULAR_BUFFER; list all if several reported.
+      network_mode:
+        range: NetworkModeEnum
+      network_distance_m:
+        range: float
+      network_time_min:
+        range: float
+      intersection_min_overlap_pct:
+        range: float
+        minimum_value: 0
+        maximum_value: 100
+      kernel_bandwidth_m:
+        range: float
+      kernel_grid_resolution_m:
+        range: float
+      geocoding_precision:
+        range: GeocodingPrecisionEnum
+        recommended: true
+      geocoding_mixed_breakdown:
+        description: For MIXED, e.g. "80% building, 20% postcode".
+      geocoder:
+        description: Geocoding database name and version/release date.
+        recommended: true
+      aggregation:
+        range: AggregationEnum
+        required: true
+      aggregation_n:
+        range: integer
+        description: N for MULTI_YEAR_MEAN (years) or PERCENTILE.
+      participant_coverage_pct:
+        range: float
+        minimum_value: 0
+        maximum_value: 100
+        recommended: true
+      coverage_unit:
+        range: CoverageUnitEnum
+      study_area_coverage_pct:
+        range: float
+        minimum_value: 0
+        maximum_value: 100
+      exposure_window:
+        range: ExposureWindowEnum
+        recommended: true
+      exposure_window_years:
+        range: integer
+      exposure_window_detail:
+        description: Trimester, age range, etc.
+      residential_history:
+        range: ResidentialHistoryEnum
+        recommended: true
+      residential_history_detail:
+      linkage_date:
+        range: date
+        recommended: true
+      relinkages:
+        range: Relinkage
+        multivalued: true
+        inlined_as_list: true
+    rules:
+      - description: Circular buffer needs a radius.
+        preconditions:
+          slot_conditions:
+            operation:
+              equals_string: CIRCULAR_BUFFER
+        postconditions:
+          slot_conditions:
+            buffer_radii_m:
+              required: true
+      - description: Network buffer needs a mode.
+        preconditions:
+          slot_conditions:
+            operation:
+              equals_string: NETWORK_BUFFER
+        postconditions:
+          slot_conditions:
+            network_mode:
+              required: true
+      - description: Kernel density needs bandwidth.
+        preconditions:
+          slot_conditions:
+            operation:
+              equals_string: KERNEL_DENSITY_WEIGHTED
+        postconditions:
+          slot_conditions:
+            kernel_bandwidth_m:
+              required: true
+      - description: Multi-year mean needs N.
+        preconditions:
+          slot_conditions:
+            aggregation:
+              equals_string: MULTI_YEAR_MEAN
+        postconditions:
+          slot_conditions:
+            aggregation_n:
+              required: true
+      - description: Percentile needs N.
+        preconditions:
+          slot_conditions:
+            aggregation:
+              equals_string: PERCENTILE
+        postconditions:
+          slot_conditions:
+            aggregation_n:
+              required: true
+      - description: POSTCODE_CENTROID needs centroid weighting.
+        preconditions:
+          slot_conditions:
+            spatial_linkage_unit:
+              equals_string: POSTCODE_CENTROID
+        postconditions:
+          slot_conditions:
+            centroid_weighting:
+              required: true
+      - description: CENSUS_TRACT_CENTROID needs centroid weighting.
+        preconditions:
+          slot_conditions:
+            spatial_linkage_unit:
+              equals_string: CENSUS_TRACT_CENTROID
+        postconditions:
+          slot_conditions:
+            centroid_weighting:
+              required: true
+      - description: LSOA_CENTROID needs centroid weighting.
+        preconditions:
+          slot_conditions:
+            spatial_linkage_unit:
+              equals_string: LSOA_CENTROID
+        postconditions:
+          slot_conditions:
+            centroid_weighting:
+              required: true
+      - description: MUNICIPALITY_CENTROID needs centroid weighting.
+        preconditions:
+          slot_conditions:
+            spatial_linkage_unit:
+              equals_string: MUNICIPALITY_CENTROID
+        postconditions:
+          slot_conditions:
+            centroid_weighting:
+              required: true
+      - description: OTHER_AREAL_CENTROID needs centroid weighting.
+        preconditions:
+          slot_conditions:
+            spatial_linkage_unit:
+              equals_string: OTHER_AREAL_CENTROID
+        postconditions:
+          slot_conditions:
+            centroid_weighting:
+              required: true
+      - description: Population weighting needs the population dataset.
+        preconditions:
+          slot_conditions:
+            centroid_weighting:
+              equals_string: POPULATION_WEIGHTED
+        postconditions:
+          slot_conditions:
+            population_dataset:
+              required: true
+      - description: Mixed geocoding needs a breakdown.
+        preconditions:
+          slot_conditions:
+            geocoding_precision:
+              equals_string: MIXED
+        postconditions:
+          slot_conditions:
+            geocoding_mixed_breakdown:
+              required: true
+
+  Relinkage:
+    attributes:
+      date:
+        range: date
+        required: true
+      reason:
+        required: true
+
+  Person:
+    description: "CSV: Creator(s)"
+    attributes:
+      name:
+      email:
+        pattern: "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+      orcid:
+        range: CURIE
+        description: e.g. ORCID:0000-0002-1825-0097
+      role:
+        description: e.g. senior investigator
+
+# ---------------------------------------------------------------- enums
+# TODO: bind permissible values to ENVO/ExO/NCIT terms via `meaning:` once
+# curated by the Work Stream - left unbound to avoid guessed IDs.
+enums:
+  CountryCodeEnum:
+    description: ISO 3166-1 alpha-2, officially assigned codes (GB, not UK).
+    permissible_values:
+      "AD":
+      "AE":
+      "AF":
+      "AG":
+      "AI":
+      "AL":
+      "AM":
+      "AO":
+      "AQ":
+      "AR":
+      "AS":
+      "AT":
+      "AU":
+      "AW":
+      "AX":
+      "AZ":
+      "BA":
+      "BB":
+      "BD":
+      "BE":
+      "BF":
+      "BG":
+      "BH":
+      "BI":
+      "BJ":
+      "BL":
+      "BM":
+      "BN":
+      "BO":
+      "BQ":
+      "BR":
+      "BS":
+      "BT":
+      "BV":
+      "BW":
+      "BY":
+      "BZ":
+      "CA":
+      "CC":
+      "CD":
+      "CF":
+      "CG":
+      "CH":
+      "CI":
+      "CK":
+      "CL":
+      "CM":
+      "CN":
+      "CO":
+      "CR":
+      "CU":
+      "CV":
+      "CW":
+      "CX":
+      "CY":
+      "CZ":
+      "DE":
+      "DJ":
+      "DK":
+      "DM":
+      "DO":
+      "DZ":
+      "EC":
+      "EE":
+      "EG":
+      "EH":
+      "ER":
+      "ES":
+      "ET":
+      "FI":
+      "FJ":
+      "FK":
+      "FM":
+      "FO":
+      "FR":
+      "GA":
+      "GB":
+      "GD":
+      "GE":
+      "GF":
+      "GG":
+      "GH":
+      "GI":
+      "GL":
+      "GM":
+      "GN":
+      "GP":
+      "GQ":
+      "GR":
+      "GS":
+      "GT":
+      "GU":
+      "GW":
+      "GY":
+      "HK":
+      "HM":
+      "HN":
+      "HR":
+      "HT":
+      "HU":
+      "ID":
+      "IE":
+      "IL":
+      "IM":
+      "IN":
+      "IO":
+      "IQ":
+      "IR":
+      "IS":
+      "IT":
+      "JE":
+      "JM":
+      "JO":
+      "JP":
+      "KE":
+      "KG":
+      "KH":
+      "KI":
+      "KM":
+      "KN":
+      "KP":
+      "KR":
+      "KW":
+      "KY":
+      "KZ":
+      "LA":
+      "LB":
+      "LC":
+      "LI":
+      "LK":
+      "LR":
+      "LS":
+      "LT":
+      "LU":
+      "LV":
+      "LY":
+      "MA":
+      "MC":
+      "MD":
+      "ME":
+      "MF":
+      "MG":
+      "MH":
+      "MK":
+      "ML":
+      "MM":
+      "MN":
+      "MO":
+      "MP":
+      "MQ":
+      "MR":
+      "MS":
+      "MT":
+      "MU":
+      "MV":
+      "MW":
+      "MX":
+      "MY":
+      "MZ":
+      "NA":
+      "NC":
+      "NE":
+      "NF":
+      "NG":
+      "NI":
+      "NL":
+      "NO":
+      "NP":
+      "NR":
+      "NU":
+      "NZ":
+      "OM":
+      "PA":
+      "PE":
+      "PF":
+      "PG":
+      "PH":
+      "PK":
+      "PL":
+      "PM":
+      "PN":
+      "PR":
+      "PS":
+      "PT":
+      "PW":
+      "PY":
+      "QA":
+      "RE":
+      "RO":
+      "RS":
+      "RU":
+      "RW":
+      "SA":
+      "SB":
+      "SC":
+      "SD":
+      "SE":
+      "SG":
+      "SH":
+      "SI":
+      "SJ":
+      "SK":
+      "SL":
+      "SM":
+      "SN":
+      "SO":
+      "SR":
+      "SS":
+      "ST":
+      "SV":
+      "SX":
+      "SY":
+      "SZ":
+      "TC":
+      "TD":
+      "TF":
+      "TG":
+      "TH":
+      "TJ":
+      "TK":
+      "TL":
+      "TM":
+      "TN":
+      "TO":
+      "TR":
+      "TT":
+      "TV":
+      "TW":
+      "TZ":
+      "UA":
+      "UG":
+      "UM":
+      "US":
+      "UY":
+      "UZ":
+      "VA":
+      "VC":
+      "VE":
+      "VG":
+      "VI":
+      "VN":
+      "VU":
+      "WF":
+      "WS":
+      "YE":
+      "YT":
+      "ZA":
+      "ZM":
+      "ZW":
+  ExposureDomainEnum:
+    permissible_values:
+      AIR_POLLUTION:
+      CLIMATE_WEATHER:
+      GREEN_SPACE:
+      BLUE_SPACE:
+      NOISE:
+      SOCIODEMOGRAPHIC:
+      BUILT_ENVIRONMENT:
+      WATER_QUALITY:
+      LIGHT_POLLUTION:
+      BIODIVERSITY:
+      INDOOR_HOME_ENVIRONMENT:
+      OTHER:
+  DataOriginEnum:
+    permissible_values:
+      MONITORING_STATION:
+      LAND_USE_REGRESSION:
+      CHEMICAL_TRANSPORT_MODEL:
+      SATELLITE_DERIVED:
+      PERSONAL_MONITOR:
+      QUESTIONNAIRE:
+      ADMINISTRATIVE_RECORD:
+      REANALYSIS:
+        description: Added - ERA5-type products were otherwise unclassifiable.
+      OTHER:
+  GeographicScopeEnum:
+    permissible_values:
+      COUNTRIES_OR_REGIONS:
+      EU27:
+      GLOBAL:
+  SpatialResolutionTypeEnum:
+    permissible_values:
+      GRID_METRIC:
+      GRID_DEGREE:
+      ADMINISTRATIVE_UNIT:
+      POINT_ADDRESS:
+      POINT_GPS:
+  TemporalResolutionEnum:
+    permissible_values:
+      SUB_HOURLY:
+      HOURLY:
+      DAILY:
+      WEEKLY:
+      MONTHLY:
+      SEASONAL:
+      ANNUAL:
+      MULTI_YEAR_AVERAGE:
+      EVENT_BASED:
+      STATIC:
+      PERIODIC_UPDATE:
+  ValidationMetricEnum:
+    permissible_values:
+      R2:
+      RMSE:
+      NRMSE_PCT:
+      MEAN_BIAS:
+      RELATIVE_BIAS_PCT:
+      PEARSON_R:
+  ValidationDesignEnum:
+    permissible_values:
+      LOOCV_SPATIAL:
+      INDEPENDENT_TEST_SET_SPATIAL:
+      TEMPORAL:
+      OVERALL:
+      GROUND_MONITOR_COMPARISON:
+  UncertaintyTypeEnum:
+    permissible_values:
+      NOT_AVAILABLE:
+      SD_PER_UNIT:
+      PREDICTION_INTERVAL_95:
+      FULL_PREDICTIVE_DISTRIBUTION:
+      MODEL_LEVEL_RMSE_ONLY:
+  SpatialLinkageUnitEnum:
+    permissible_values:
+      GEOCODED_ADDRESS:
+      GPS_COORDINATE:
+      POSTCODE_CENTROID:
+      CENSUS_TRACT_CENTROID:
+      LSOA_CENTROID:
+      MUNICIPALITY_CENTROID:
+      OTHER_AREAL_CENTROID:
+      GRID_CELL_CONTAINING_ADDRESS:
+  CentroidWeightingEnum:
+    permissible_values:
+      GEOMETRIC:
+      POPULATION_WEIGHTED:
+      AREA_WEIGHTED:
+  LinkageOperationEnum:
+    permissible_values:
+      POINT_IN_POLYGON:
+      CIRCULAR_BUFFER:
+      NETWORK_BUFFER:
+      NEAREST_FEATURE:
+      AREAL_INTERPOLATION:
+      INTERSECTION:
+      KERNEL_DENSITY_WEIGHTED:
+      ADMINISTRATIVE_ASSIGNMENT:
+  NetworkModeEnum:
+    permissible_values:
+      WALKING:
+      CYCLING:
+      DRIVING:
+      PUBLIC_TRANSPORT:
+  GeocodingPrecisionEnum:
+    permissible_values:
+      BUILDING:
+        description: "< 5 m"
+      PARCEL:
+        description: "< 10 m"
+      STREET:
+        description: "< 50 m"
+      POSTCODE_CENTROID:
+        description: "< 500 m"
+      CENSUS_UNIT_CENTROID:
+        description: "> 500 m"
+      MIXED:
+      UNKNOWN:
+  AggregationEnum:
+    permissible_values:
+      ANNUAL_MEAN:
+      MONTHLY_MEAN:
+      DAILY_MEAN:
+      DAILY_MAX:
+      DAILY_MIN:
+      EIGHT_HOUR_MEAN:
+      WARM_SEASON_MEAN:
+      COLD_SEASON_MEAN:
+      NIGHT_TIME_MEAN:
+      MULTI_YEAR_MEAN:
+      CUMULATIVE_SUM:
+      PERCENTILE:
+      PRESENCE_ABSENCE:
+      DISTANCE_TO_NEAREST:
+      COUNT_WITHIN_BUFFER:
+      MEAN_WITHIN_BUFFER:
+        description: Buffer geometry lives in linkage.operation - not duplicated here.
+      COMPOSITE_INDEX:
+      RAW_TIME_SERIES:
+  CoverageUnitEnum:
+    permissible_values:
+      PARTICIPANTS:
+      HOUSEHOLDS:
+      CLINICAL_SITES:
+      HOSPITALS:
+      GEOGRAPHIC_UNITS:
+  ExposureWindowEnum:
+    permissible_values:
+      YEAR_BEFORE_RECRUITMENT:
+      N_YEARS_BEFORE_INDEX:
+      PRENATAL:
+      PERICONCEPTION:
+      INFANCY:
+      EARLY_CHILDHOOD:
+      ADOLESCENCE:
+      LIFETIME_CUMULATIVE:
+      TIME_VARYING_ANNUAL:
+      CRITICAL_WINDOW:
+  ResidentialHistoryEnum:
+    permissible_values:
+      BASELINE_ONLY:
+      FULL_HISTORY:
+      PARTIAL_HISTORY:
+      NOT_APPLICABLE:
+      UNKNOWN:

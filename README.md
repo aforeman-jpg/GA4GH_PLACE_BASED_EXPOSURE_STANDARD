@@ -1,8 +1,16 @@
-# GA4GH Environmental Exposure Linkage Metadata (draft 0.1.0)
+# Repository for the GA4GH Human Exposome Data Standards Working Group 
+
+## Scope 
 
 Environmental exposures such as air pollution, diet, physical activity, and social stress can influence the onset of disease. These effects often accumulate slowly over time and can depend on multiple factors such as lifestyle, occupation, and living conditions. Currently, environmental data is captured in different ways by research groups internationally, making it hard to compare or combine this information. 
 
-[The Human Exposome Data Standards Study Group](url) is working to solve a big problem in global health research: there are not yet consistent, shared ways to describe how the environment affects human health — especially over long periods of time and across different populations. Find out more here: https://doi.org/10.5281/zenodo.21877291
+[The Human Exposome Data Standards Study Group](url) is working to solve a big problem in global health research: there are not yet consistent, shared ways to describe how the environment affects human health — especially over long periods of time and across different populations. 
+
+## Documentation
+
+Find out more about the aims of the Human Exposome Data Standards Group here: https://doi.org/10.5281/zenodo.21877291
+
+Documentation laying out how to implement the place-based exposure standard below are under development but will be in README format. 
 
 We are creating a machine-readable *Place-Based Exposures Metadata Schema*. Each
 **record** describes one exposure variable linked to one cohort. Find out more about the work in 
@@ -19,7 +27,8 @@ examples/invalid/*.yaml               # must fail CI (regression tests for the r
 .github/workflows/validate.yml
 ```
 
-## Place-based exposure schema 
+## Place-based Exposures MetaData Schema (draft 0.1.0)
+This is the first version of the standard. The schema contains both Core and Optional Elements. When appropriate, the schema advises on what existing ontologies are required. 
 
 | CSV field | Machine-readable form | Why |
 |---|---|---|

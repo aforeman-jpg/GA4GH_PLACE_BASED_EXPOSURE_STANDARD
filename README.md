@@ -18,8 +18,8 @@ We are creating a machine-readable *Place-Based Exposures Metadata Schema*. Each
 ## Place-based Exposures MetaData Schema (draft 0.1.0)
 This is the first version of the standard. The schema contains both *Core* and *Recommended* Elements. When appropriate, the schema advises on what existing ontologies are required. 
 
-| CSV field | Machine-readable form | Why |
-|---|---|---|
+| Field | Machine-readable form | Why | Info |
+|---|---|---|---|
 | Cohort / Study Name | `cohort.name` + `cohort.acronym` | No parsing of "Name (ACR)" |
 | Country of data collection | `cohort.collection_countries[]` (ISO 3166-1 enum) | Rejects invalid codes such as `UK` |
 | Exposure Domain | `exposure.domain` enum + `domain_other` | "Other (specify)" becomes a required field |
